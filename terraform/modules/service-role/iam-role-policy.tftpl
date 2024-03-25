@@ -1,0 +1,63 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeRegions"
+            ],
+            "Resource": "*",
+            "Sid": "DiscoverActiveRegions"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeImages",
+                "ec2:DescribeInstances",
+                "ec2:DescribeInternetGateways",
+                "ec2:DescribeKeyPairs",
+                "ec2:DescribeNetworkAcls",
+                "ec2:DescribeRouteTables",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSnapshots",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeVolumes",
+                "ec2:DescribeVpcs"
+            ],
+            "Resource": "*",
+            "Sid": "DiscoverTags"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeSnapshots"
+            ],
+            "Resource": "*",
+            "Sid": "DiscoverSnapshots"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DeleteSnapshot"
+            ],
+            "Resource": "*",
+            "Sid": "DeleteSnapshots"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeImages"
+            ],
+            "Resource": "*",
+            "Sid": "DiscoverImages"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DeregisterImage"
+            ],
+            "Resource": "*",
+            "Sid": "DeleteImages"
+        }
+    ]
+}

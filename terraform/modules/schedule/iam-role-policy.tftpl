@@ -1,0 +1,13 @@
+{
+    "Statement": [
+        {
+            "Action": "states:StartExecution",
+            "Effect": "Allow",
+            "Resource": [
+                "${step_function_arn}"
+            ],
+            "Sid": "AllowStepFunctionInvocation"
+        }
+    ],
+    "Version": "2012-10-17"
+}

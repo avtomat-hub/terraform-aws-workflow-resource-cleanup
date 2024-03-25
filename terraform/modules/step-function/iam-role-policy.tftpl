@@ -1,0 +1,16 @@
+{
+    "Statement": [
+        {
+            "Action": "lambda:InvokeFunction",
+            "Effect": "Allow",
+            "Resource": [
+                %{ for lambda in lambda_function_names ~}
+                "arn:aws:lambda:${region}:${current_account_id}:function:resource-cleanup-${lambda.name}",
+                %{ endfor ~}
+                "arn:aws:lambda:${region}:${current_account_id}:function:none"
+            ],
+            "Sid": "AllowLambdaInvocation"
+        }
+    ],
+    "Version": "2012-10-17"
+}

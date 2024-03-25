@@ -1,0 +1,50 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": "logs:CreateLogGroup",
+            "Effect": "Allow",
+            "Resource": "arn:aws:logs:${region}:${current_account_id}:*",
+            "Sid": "LogGroup"
+        },
+        {
+            "Action": [
+                "logs:PutLogEvents",
+                "logs:CreateLogStream"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:logs:${region}:${current_account_id}:log-group:/aws/lambda/${name}:*",
+            "Sid": "LogStream"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Resource": "arn:aws:iam::*:role/${service_role_name}"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket",
+                "s3:GetObject"
+            ],
+            "Resource": "*",
+            "Sid": "DiscoverObjects"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:DeleteObject"
+            ],
+            "Resource": "*",
+            "Sid": "DeleteObjects"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": "*",
+            "Sid": "CreateObjects"
+        }
+    ]
+}

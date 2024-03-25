@@ -1,0 +1,33 @@
+{
+  "Comment": "Invoke lambda functions per account using dynamic variables.",
+  "StartAt": "${lambda_function_names[0].name}",
+  "States": {
+    %{~ for lambda in lambda_function_names ~}
+    "${lambda.name}": {
+      "Type": "Map",
+      "ItemsPath": "$.${lambda.name}.accounts",
+      "MaxConcurrency": 0,
+      "Iterator": {
+        "StartAt": "invoke-${lambda.name}",
+        "States": {
+          "invoke-${lambda.name}": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:${region}:${current_account_id}:function:resource-cleanup-${lambda.name}",
+            "End": true
+          }
+        }
+      },
+      "Next": "${lambda.next}",
+      "ItemSelector": {
+        "account.$": "$$.Map.Item.Value",
+        "vars.$": "$.${lambda.name}.vars"
+      },
+      "ResultPath": null
+    },
+    %{~ endfor ~}
+    "finish": {
+        "Type": "Pass",
+        "End": true
+    }
+  }
+}

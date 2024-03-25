@@ -1,0 +1,13 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowHubAccountToAssumeRole",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::${hub_account_id}:root"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}

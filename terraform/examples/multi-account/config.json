@@ -1,0 +1,40 @@
+{
+  "ec2-images": {
+    "accounts": [
+      "111111111111",
+      "333333333333"
+    ],
+    "vars": {
+      "regions": [
+        "us-east-1",
+        "af-south-1"
+      ],
+      "exclude_tags": [
+        "ExcludeFromCleanup=true"
+      ],
+      "threshold_days": 20,
+      "wait_before_delete_days": 7,
+      "cutoff_date": "2020/01/01",
+      "bucket_name": "${bucket_name}"
+    }
+  },
+  "ec2-snapshots": {
+    "accounts": [
+      "111111111111",
+      "333333333333"
+    ],
+    "vars": {
+      "regions": [
+        "us-east-1",
+        "af-south-1"
+      ],
+      "exclude_tags": [
+        "ExcludeFromCleanup=true"
+      ],
+      "threshold_days": 20,
+      "wait_before_delete_days": 7,
+      "cutoff_date": "2020/01/01",
+      "bucket_name": "${bucket_name}"
+    }
+  }
+}
