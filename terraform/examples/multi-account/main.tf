@@ -28,19 +28,3 @@ module "schedule" {
   })
   step_function_arn = module.step-function.step_function_arn
 }
-
-module "service-role-hub" {
-  source = "../../modules/service-role"
-
-  hub_account_id = "333333333333"
-}
-
-module "service-role-spoke-111111111111" {
-  source = "../../modules/service-role"
-
-  hub_account_id = "333333333333"
-
-  providers = {
-    aws = aws.spoke-111111111111
-  }
-}

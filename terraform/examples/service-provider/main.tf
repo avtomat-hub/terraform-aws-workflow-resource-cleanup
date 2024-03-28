@@ -34,8 +34,8 @@ module "step-function" {
 module "example-client" {
   source = "./clients/example-client"
 
-  hub_account_id    = 333333333333
   client_name       = "example-client"
+  hub_account_id    = 333333333333
   bucket_name       = module.bucket.bucket_name
   step_function_arn = module.step-function.step_function_arn
 }

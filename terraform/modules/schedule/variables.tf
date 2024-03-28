@@ -25,7 +25,7 @@ variable "name" {
 }
 
 variable "schedule" {
-  description = "How often the workflow will run. Rate expressions -> https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rate-expressions.html"
+  description = "How often the workflow will run. Rate expressions -> https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-cron-expressions.html"
   type        = string
-  default     = "rate(1 day)"
+  default     = "cron(15 12 * * ? *)"
 }

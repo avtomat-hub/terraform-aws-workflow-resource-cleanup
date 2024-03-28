@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 provider "aws" {
-  alias  = "222222222222"
+  alias  = "spoke-222222222222"
   region = "us-east-1"
 
   assume_role {
