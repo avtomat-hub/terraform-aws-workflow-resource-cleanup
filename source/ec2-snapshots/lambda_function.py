@@ -1,6 +1,6 @@
 import os
 import logging
-from avtomat_aws import iam, sts, ec2, s3, general
+from avtomat_aws import sts, ec2, s3, general
 
 logging.basicConfig(level=logging.WARNING,
                     format='%(asctime)s - %(levelname)s - %(message)s',

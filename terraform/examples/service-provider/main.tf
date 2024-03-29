@@ -9,12 +9,16 @@
 # The below modules are required at all times and should not be removed.
 # ------------------------------------------------------------------------------
 
+module "ec2-images" {
+  source = "../../modules/ec2-images"
+}
+
 module "ec2-snapshots" {
   source = "../../modules/ec2-snapshots"
 }
 
-module "ec2-images" {
-  source = "../../modules/ec2-images"
+module "ec2-volumes" {
+  source = "../../modules/ec2-volumes"
 }
 
 module "bucket" {

@@ -4,12 +4,16 @@
 # source = "git@github.com:avtomat-hub/aws-workflow-resource-cleanup.git//terraform/modules/<module>?ref=0.0.1"
 # ------------------------------------------------------------------------------
 
+module "ec2-images" {
+  source = "../../modules/ec2-images"
+}
+
 module "ec2-snapshots" {
   source = "../../modules/ec2-snapshots"
 }
 
-module "ec2-images" {
-  source = "../../modules/ec2-images"
+module "ec2-volumes" {
+  source = "../../modules/ec2-volumes"
 }
 
 module "bucket" {
