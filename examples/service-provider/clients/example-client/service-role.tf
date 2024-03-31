@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # REMOTE SOURCE
 # To reference modules remotely from your code supply a Git URL, pinning to a specific version:
-# source = "git@github.com:avtomat-hub/aws-workflow-resource-cleanup.git//terraform/modules/<module>?ref=0.0.1"
+# source = "git@github.com:avtomat-hub/aws-workflow-resource-cleanup.git//modules/<module>?ref=0.0.1"
 # ------------------------------------------------------------------------------
 
 module "service-role-111111111111" {

@@ -7,6 +7,6 @@ data "aws_lambda_layer_version" "this" {
 
 data "archive_file" "zip" {
   type        = "zip"
-  source_dir  = "${path.module}/../../../source/ec2-volumes"
+  source_dir  = "${path.module}/source"
   output_path = "${path.module}/dist/${var.name}.zip"
 }

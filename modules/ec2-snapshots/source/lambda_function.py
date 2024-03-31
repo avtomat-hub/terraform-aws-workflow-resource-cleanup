@@ -40,51 +40,51 @@ def lambda_handler(event, context):
             logger.warning(f"Region {region} is not active, skipping")
             continue
 
-        logger.info(f"Retrieving images that don't have any exclusion tags")
-        images_to_evaluate = ec2.discover_tags(resource_types=['image'], tags=exclude_tags,
-                                               missing=True, session=session, region=region)
+        logger.info("Retrieving snapshots that don't have any exclusion tags")
+        snapshots_to_evaluate = ec2.discover_tags(resource_types=['snapshot'], tags=exclude_tags,
+                                                  missing=True, session=session, region=region)
 
-        logger.info(f"Evaluating images that are older than the threshold")
-        if images_to_evaluate:
-            images = ec2.discover_images(image_ids=images_to_evaluate, exclude_aws_backups=True,
-                                         created_before=created_before, created_after=cutoff_date,
-                                         session=session, region=region)
+        logger.info("Detecting snapshots that are older than the threshold")
+        if snapshots_to_evaluate:
+            snapshots = ec2.discover_snapshots(snapshot_ids=snapshots_to_evaluate, exclude_aws_backup=True,
+                                               created_before=created_before, created_after=cutoff_date,
+                                               session=session, region=region)
         else:
-            logger.info("No images to evaluate")
-            images = []
+            logger.info("No snapshots detected")
+            snapshots = []
 
-        logger.info("Retrieving images that are scheduled for deletion")
+        logger.info("Retrieving snapshots that are scheduled for deletion")
         scheduled_for_deletion = s3.discover_objects(bucket=bucket_name,
-                                                     prefix=f'{account}/{region}/ec2-images/',
+                                                     prefix=f'{account}/{region}/ec2-snapshots/',
                                                      name_only=True)
 
-        logger.info("Removing images that were scheduled for deletion but are no longer detected")
+        logger.info("Removing snapshots that were scheduled for deletion but are no longer detected")
         # Use case: manually deleted or an exclusion tag was added
-        no_longer_detected = list(set(scheduled_for_deletion) - set(images))
-        s3.delete_objects(bucket=bucket_name, prefix=f'{account}/{region}/ec2-images',
+        no_longer_detected = list(set(scheduled_for_deletion) - set(snapshots))
+        s3.delete_objects(bucket=bucket_name, prefix=f'{account}/{region}/ec2-snapshots',
                           objects=no_longer_detected)
 
-        logger.info("Retrieving images that are ready to delete")
+        logger.info("Retrieving snapshots that are ready to delete")
         ready_to_delete = s3.discover_objects(bucket=bucket_name,
-                                              prefix=f'{account}/{region}/ec2-images/',
+                                              prefix=f'{account}/{region}/ec2-snapshots/',
                                               modified_before=grace_period,
                                               name_only=True)
 
-        logger.info("Deleting images")
-        detected_and_ready = list(set(ready_to_delete) & set(images))
-        ec2.delete_images(image_ids=detected_and_ready, include_snapshots=True, session=session, region=region)
-        s3.delete_objects(bucket=bucket_name, prefix=f'{account}/{region}/ec2-images',
+        logger.info("Deleting snapshots")
+        detected_and_ready = list(set(ready_to_delete) & set(snapshots))
+        ec2.delete_snapshots(snapshot_ids=detected_and_ready, session=session, region=region)
+        s3.delete_objects(bucket=bucket_name, prefix=f'{account}/{region}/ec2-snapshots',
                           objects=detected_and_ready)
 
-        logger.info("Scheduling newly detected images for deletion")
-        newly_detected = list(set(images) - set(scheduled_for_deletion))
+        logger.info("Scheduling newly detected snapshots for deletion")
+        newly_detected = list(set(snapshots) - set(scheduled_for_deletion))
         objects = [{'Key': obj, 'Body': ''} for obj in newly_detected]
-        s3.create_objects(bucket=bucket_name, prefix=f'{account}/{region}/ec2-images',
+        s3.create_objects(bucket=bucket_name, prefix=f'{account}/{region}/ec2-snapshots',
                           objects=objects)
 
         logger.info(f"Checked region: {region}")
 
     return {
         'statusCode': 200,
-        'body': 'Success'
+        'body': 'Done'
     }

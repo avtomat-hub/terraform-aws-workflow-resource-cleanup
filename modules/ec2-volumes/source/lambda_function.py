@@ -43,16 +43,17 @@ def lambda_handler(event, context):
         volumes_to_evaluate = ec2.discover_tags(resource_types=['volume'], tags=exclude_tags,
                                                 missing=True, session=session, region=region)
 
-        logger.info(f"Evaluating volumes detached for longer period than the threshold")
+        logger.info(f"Detecting volumes detached for longer period than the threshold")
         volumes = []
         if volumes_to_evaluate:
             for volume in volumes_to_evaluate:
                 events = cloudtrail.discover_resource_events(resource_id=volume, events=['DetachVolume'],
-                                                             created_before=detached_before, session=session, region=region)
+                                                             created_before=detached_before, silent=True,
+                                                             session=session, region=region)
                 if events:
                     volumes.append(volume)
         else:
-            logger.info("No volumes to evaluate")
+            logger.info("No volumes detected")
 
         logger.info("Retrieving volumes that are scheduled for deletion")
         scheduled_for_deletion = s3.discover_objects(bucket=bucket_name,

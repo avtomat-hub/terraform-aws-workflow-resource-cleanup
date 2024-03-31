@@ -17,13 +17,13 @@ variable "service_role_name" {
 variable "name" {
   description = "A unique name for the Lambda Function"
   type        = string
-  default     = "resource-cleanup-ec2-volumes"
+  default     = "resource-cleanup-ec2-images"
 }
 
 variable "description" {
   description = "A description of the workflow"
   type        = string
-  default     = "Deletes snapshots that are older than a certain age"
+  default     = "Deletes images older than certain days"
 }
 
 variable "layer_name" {

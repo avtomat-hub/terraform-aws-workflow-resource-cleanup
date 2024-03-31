@@ -23,7 +23,7 @@ variable "name" {
 variable "description" {
   description = "A description of the workflow"
   type        = string
-  default     = "Deletes snapshots that are older than a certain age"
+  default     = "Deletes snapshots older than certain days"
 }
 
 variable "layer_name" {
