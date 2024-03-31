@@ -22,8 +22,8 @@ def lambda_handler(event, context):
 
     logger.info(f"Checking account: {account}")
 
-    detached_before = general.get_date(before=threshold_days)
-    grace_period = general.get_date(before=wait_before_delete_days)
+    detached_before = general.get_date(before=threshold_days, format='iso')
+    grace_period = general.get_date(before=wait_before_delete_days, format='string')
 
     role_arn = f'arn:aws:iam::{account}:role/{role_name}'
     session = sts.create_session(role_arn=role_arn)
@@ -48,10 +48,11 @@ def lambda_handler(event, context):
         if volumes_to_evaluate:
             for volume in volumes_to_evaluate:
                 events = cloudtrail.discover_resource_events(resource_id=volume, events=['DetachVolume'],
-                                                             created_before=detached_before, silent=True,
-                                                             session=session, region=region)
-                if events:
+                                                             silent=True, session=session, region=region)
+                if events and events[0]['EventTime'] < detached_before:
                     volumes.append(volume)
+                elif not events:
+                    logger.warning(f"No 'DetachVolume' CloudTrail events found for {volume}")
         else:
             logger.info("No volumes detected")
 

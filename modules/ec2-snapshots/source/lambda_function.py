@@ -23,8 +23,8 @@ def lambda_handler(event, context):
 
     logger.info(f"Checking account: {account}")
 
-    created_before = general.get_date(before=threshold_days)
-    grace_period = general.get_date(before=wait_before_delete_days)
+    created_before = general.get_date(before=threshold_days, format='string')
+    grace_period = general.get_date(before=wait_before_delete_days, format='string')
 
     role_arn = f'arn:aws:iam::{account}:role/{role_name}'
     session = sts.create_session(role_arn=role_arn)
