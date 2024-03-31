@@ -23,8 +23,8 @@ def lambda_handler(event, context):
 
     logger.info(f"Checking account: {account}")
 
-    created_before = general.get_date(before=threshold_days, format='string')
-    grace_period = general.get_date(before=wait_before_delete_days, format='string')
+    created_before = general.get_date(before=threshold_days, format='string', silent=True)
+    grace_period = general.get_date(before=wait_before_delete_days, format='string', silent=True)
 
     role_arn = f'arn:aws:iam::{account}:role/{role_name}'
     session = sts.create_session(role_arn=role_arn)
@@ -57,21 +57,24 @@ def lambda_handler(event, context):
         scheduled_for_deletion = s3.discover_objects(bucket=bucket_name,
                                                      prefix=f'{account}/{region}/ec2-snapshots/',
                                                      name_only=True)
+        logger.info(scheduled_for_deletion)
 
         logger.info("Removing snapshots that were scheduled for deletion but are no longer detected")
         # Use case: manually deleted or an exclusion tag was added
         no_longer_detected = list(set(scheduled_for_deletion) - set(snapshots))
         s3.delete_objects(bucket=bucket_name, prefix=f'{account}/{region}/ec2-snapshots',
                           objects=no_longer_detected)
+        logger.info(no_longer_detected)
 
         logger.info("Retrieving snapshots that are ready to delete")
         ready_to_delete = s3.discover_objects(bucket=bucket_name,
                                               prefix=f'{account}/{region}/ec2-snapshots/',
                                               modified_before=grace_period,
                                               name_only=True)
+        detected_and_ready = list(set(ready_to_delete) & set(snapshots))
+        logger.info(detected_and_ready)
 
         logger.info("Deleting snapshots")
-        detected_and_ready = list(set(ready_to_delete) & set(snapshots))
         ec2.delete_snapshots(snapshot_ids=detected_and_ready, session=session, region=region)
         s3.delete_objects(bucket=bucket_name, prefix=f'{account}/{region}/ec2-snapshots',
                           objects=detected_and_ready)
@@ -81,6 +84,7 @@ def lambda_handler(event, context):
         objects = [{'Key': obj, 'Body': ''} for obj in newly_detected]
         s3.create_objects(bucket=bucket_name, prefix=f'{account}/{region}/ec2-snapshots',
                           objects=objects)
+        logger.info(newly_detected)
 
         logger.info(f"Checked region: {region}")
 

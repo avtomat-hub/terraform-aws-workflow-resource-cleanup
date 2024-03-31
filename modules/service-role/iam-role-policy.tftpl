@@ -58,6 +58,26 @@
             ],
             "Resource": "*",
             "Sid": "DeleteImages"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cloudtrail:LookupEvents"
+            ],
+            "Resource": "*",
+            "Sid": "DiscoverResourceEvents"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DeleteVolume",
+                "ec2:CreateTags",
+                "ec2:DescribeVolumes",
+                "ec2:CreateSnapshot",
+                "ec2:DescribeSnapshots"
+            ],
+            "Resource": "*",
+            "Sid": "DeleteVolumes"
         }
     ]
 }

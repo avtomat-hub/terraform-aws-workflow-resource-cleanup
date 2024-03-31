@@ -22,8 +22,8 @@ def lambda_handler(event, context):
 
     logger.info(f"Checking account: {account}")
 
-    detached_before = general.get_date(before=threshold_days, format='iso')
-    grace_period = general.get_date(before=wait_before_delete_days, format='string')
+    detached_before = general.get_date(before=threshold_days, format='iso', silent=True)
+    grace_period = general.get_date(before=wait_before_delete_days, format='string', silent=True)
 
     role_arn = f'arn:aws:iam::{account}:role/{role_name}'
     session = sts.create_session(role_arn=role_arn)
@@ -43,38 +43,44 @@ def lambda_handler(event, context):
         volumes_to_evaluate = ec2.discover_tags(resource_types=['volume'], tags=exclude_tags,
                                                 missing=True, session=session, region=region)
 
-        logger.info(f"Detecting volumes detached for longer period than the threshold")
+        logger.info(f"Filtering for detached volumes")
+        detached_volumes = ec2.discover_volumes(volume_ids=volumes_to_evaluate, detached=True,
+                                                session=session, region=region)
+
+        logger.info(f"Filtering for volumes detached before the threshold")
         volumes = []
-        if volumes_to_evaluate:
-            for volume in volumes_to_evaluate:
-                events = cloudtrail.discover_resource_events(resource_id=volume, events=['DetachVolume'],
-                                                             silent=True, session=session, region=region)
-                if events and events[0]['EventTime'] < detached_before:
-                    volumes.append(volume)
-                elif not events:
-                    logger.warning(f"No 'DetachVolume' CloudTrail events found for {volume}")
-        else:
-            logger.info("No volumes detected")
+        for volume in detached_volumes:
+            events = cloudtrail.discover_resource_events(resource_id=volume, events=['DetachVolume'],
+                                                         silent=True, session=session, region=region)
+            # Check latest event only
+            if events and events[0]['EventTime'] < detached_before:
+                volumes.append(volume)
+            elif not events:
+                logger.warning(f"No 'DetachVolume' CloudTrail events found for {volume}")
+        logger.info(volumes)
 
         logger.info("Retrieving volumes that are scheduled for deletion")
         scheduled_for_deletion = s3.discover_objects(bucket=bucket_name,
                                                      prefix=f'{account}/{region}/ec2-volumes/',
                                                      name_only=True)
+        logger.info(scheduled_for_deletion)
 
         logger.info("Removing volumes that were scheduled for deletion but are no longer detected")
         # Use case: manually deleted or an exclusion tag was added
         no_longer_detected = list(set(scheduled_for_deletion) - set(volumes))
         s3.delete_objects(bucket=bucket_name, prefix=f'{account}/{region}/ec2-volumes',
                           objects=no_longer_detected)
+        logger.info(no_longer_detected)
 
         logger.info("Retrieving volumes that are ready to delete")
         ready_to_delete = s3.discover_objects(bucket=bucket_name,
                                               prefix=f'{account}/{region}/ec2-volumes/',
                                               modified_before=grace_period,
                                               name_only=True)
+        detected_and_ready = list(set(ready_to_delete) & set(volumes))
+        logger.info(detected_and_ready)
 
         logger.info("Deleting volumes")
-        detected_and_ready = list(set(ready_to_delete) & set(volumes))
         ec2.delete_volumes(volume_ids=detected_and_ready, snapshot=True, session=session, region=region)
         s3.delete_objects(bucket=bucket_name, prefix=f'{account}/{region}/ec2-volumes',
                           objects=detected_and_ready)
@@ -84,6 +90,7 @@ def lambda_handler(event, context):
         objects = [{'Key': obj, 'Body': ''} for obj in newly_detected]
         s3.create_objects(bucket=bucket_name, prefix=f'{account}/{region}/ec2-volumes',
                           objects=objects)
+        logger.info(newly_detected)
 
         logger.info(f"Checked region: {region}")
 

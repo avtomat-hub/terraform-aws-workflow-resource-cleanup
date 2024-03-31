@@ -17,5 +17,9 @@ variable "name" {
 variable "lambda_function_names" {
   description = "A list of lambda names which comprise this Step Function"
   type        = list(any)
-  default     = [{ name : "ec2-images", next : "ec2-snapshots" }, { name : "ec2-snapshots", next : "finish" }]
+  default     = [
+    { name : "ec2-images", next : "ec2-snapshots" },
+    { name : "ec2-snapshots", next : "ec2-volumes" },
+    { name : "ec2-volumes", next : "finish" }
+  ]
 }
